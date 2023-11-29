@@ -8,16 +8,15 @@ int main()
 {
 
     cout << "Welcome to the Guess the Number game!\n\n";
-    // cout << "I have selected a random number between 1 and Upperlimit. Try to guess it.\n";
 
     // TO Inquire about the maximum number the user wishes to specify for their guessing range.
     int userLimit;
     cout << "Enter the upper limit for your guess:";
     cin >> userLimit;
 
-    cout << "I have selected a random number between 1 and " << userLimit << ". Try to guess it.\n";
+    cout << "I have selected a random number between 1 and " << userLimit << ". Try to guess it.\n\n";
 
-    // Seed the random number generator with the current time
+    // To set the random number generator with the current time
     srand(time(0));
 
     // Generate a random number between 1 and N
@@ -26,7 +25,7 @@ int main()
     // Initialize the user's guess to a number outside the valid range
     int userGuess = 0;
 
-    // To count Number Of Guesses
+    // To count Number Of Guesses the user have taken to guess the
     int count = 0;
 
     // Continue until the user guesses the correct number
@@ -53,6 +52,7 @@ int main()
             cout << "Congratulations! You guessed the correct number \"" << secretNumber << "\" in " << count << " Guesses"
                  << "!\n";
         }
+        cout << "\n";
     }
 
     return 0;
