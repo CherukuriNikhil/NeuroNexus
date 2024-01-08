@@ -67,7 +67,7 @@ int main() {
 
         char currentPlayer = 'X';
         int row, col;
-
+T
         while (true) {
             // Print the current board
             cout << "Current Board:" << endl;
