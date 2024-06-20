@@ -9,8 +9,13 @@ public:
     string ISBN;
     bool available;
 
-    Book(const string& title, const string& author, const string& ISBN)
-        : title(title), author(author), ISBN(ISBN), available(true) {}
+    Book(const string& title, const string& author, const string& ISBN){
+        this->title = title;
+        this->author = author;
+        this->ISBN = ISBN;
+        this->available= true;
+    }
+        
 };
 
 // Borrower class to store borrower information
@@ -19,7 +24,11 @@ public:
     string name;
     string id;
 
-    Borrower(const string& name, const string& id) : name(name), id(id) {}
+    Borrower(const string& name, const string& id){
+        this->name = name;
+        this->id = id;
+    }
+    
 };
 
 // Transaction class to store checkout and return transactions
@@ -30,11 +39,14 @@ public:
     time_t timestamp;
     bool isCheckout;
 
-    Transaction(Book* book, Borrower* borrower, bool isCheckout)
-        : book(book), borrower(borrower), isCheckout(isCheckout) {
-        timestamp = time(nullptr);
+    Transaction(Book* book, Borrower* borrower, bool isCheckout) {
+        this->book = book;
+        this->borrower = borrower;
+        this->isCheckout = isCheckout;
+        this->timestamp = time(nullptr);
     }
 };
+
 
 // Library class to manage books, borrowers, and transactions
 class Library {
@@ -58,17 +70,17 @@ public:
 
     // Function to search for books based on title, author, or ISBN
     void searchBooks(const string& keyword) {
-        cout << "Search Results:" << endl;
-        for (const Book& book : books) {
-            if (book.title.find(keyword) != string::npos ||
-                book.author.find(keyword) != string::npos ||
-                book.ISBN.find(keyword) != string::npos) {
-                cout << "Title: " << book.title << ", Author: " << book.author
-                          << ", ISBN: " << book.ISBN << ", Available: "
-                          << (book.available ? "Yes" : "No") << endl;
-            }
+    cout << "Search Results:" << endl;
+    for ( Book& book : books) {
+        if (book.title.find(keyword) != -1 ||
+            book.author.find(keyword) != -1 ||
+            book.ISBN.find(keyword) != -1) {
+            cout << "Title: " << book.title << ", Author: " << book.author
+                      << ", ISBN: " << book.ISBN << ", Available: "
+                      << (book.available ? "Yes" : "No") << endl;
         }
     }
+}
 
     // Function to perform book checkout
     void checkoutBook(const string& ISBN, const string& borrowerId) {
@@ -86,12 +98,11 @@ public:
 
     // Function to perform book return
     void returnBook(const string& ISBN) {
-        Book* book = findBookByISBN(ISBN);
+         Book* book = findBookByISBN(ISBN);
 
-        if (book && !book->available) {
-            // Find the last transaction related to this book
-            auto it = find_if(transactions.rbegin(), transactions.rend(),
-                                   [book](const Transaction& t) { return t.book == book; });
+    if (book && !book->available) {
+        // Find the last transaction related to this book
+        auto it = findLastTransaction(book, transactions);
 
             if (it != transactions.rend()) {
                 it->book->available = true;
@@ -111,8 +122,7 @@ public:
 
         if (book && !book->available) {
             // Find the last transaction related to this book
-            auto it = find_if(transactions.rbegin(), transactions.rend(),
-                                   [book](const Transaction& t) { return t.book == book; });
+             auto it = findLastTransaction(book, transactions);
 
             if (it != transactions.rend()) {
                 time_t currentTime = time(nullptr);
@@ -133,21 +143,36 @@ public:
     }
 
 private:
-    // Helper function to find a book by ISBN
-    Book* findBookByISBN(const string& ISBN) {
-        auto it = find_if(books.begin(), books.end(),
-                               [ISBN](const Book& b) { return b.ISBN == ISBN; });
-
-        return (it != books.end()) ? &(*it) : nullptr;
+    // Function to find the last transaction related to a book
+vector<Transaction>::reverse_iterator findLastTransaction(const Book* book, vector<Transaction>& transactions) {
+    for (auto it = transactions.rbegin(); it != transactions.rend(); ++it) {
+        if (it->book == book) {
+            return it;
+        }
     }
+    return transactions.rend();  // Return rend() if no transaction is found
+}
 
-    // Helper function to find a borrower by ID
-    Borrower* findBorrowerById(const string& id) {
-        auto it = find_if(borrowers.begin(), borrowers.end(),
-                               [id](const Borrower& b) { return b.id == id; });
 
-        return (it != borrowers.end()) ? &(*it) : nullptr;
+Book* findBookByISBN(const string& ISBN) {
+    for (const Transaction& transaction : transactions) {
+        if (transaction.book->ISBN == ISBN) {
+            return transaction.book;
+        }
     }
+    return nullptr;
+}
+
+// Helper function to find a borrower by ID
+Borrower* findBorrowerById(const string& id) {
+    for (const Transaction& transaction : transactions) {
+        if (transaction.borrower->id == id) {
+            return transaction.borrower;
+        }
+    }
+    return nullptr;
+}
+
 };
 
 int main() {
@@ -214,3 +239,9 @@ int main() {
 
     return 0;
 }
+
+
+
+/*emplace_back vs. push_back
+push_back: This function adds a copy of the given element to the end of the vector. If you use push_back with an object, it requires the object to be created first and then copied into the vector.
+emplace_back: This function constructs the element directly in place at the end of the vector using the provided arguments. It avoids the extra copy or move operation, which can be more efficient, especially for complex objects. */
